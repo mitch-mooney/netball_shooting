@@ -4,16 +4,6 @@ library(ggpmisc)
 library(dplyr)
 
 shots <- read.csv('netball_shots.csv')
-#add a few variables to assist with plotting
-shots<- shots %>%
-  mutate(shotDistance = ifelse(positionCode == 2 & distanceCode == 3, "long", ifelse(positionCode == 2 & distanceCode == 1, "long", 
-                                                                                     ifelse(positionCode == 1 & distanceCode == 1, "long", ifelse(positionCode == 0 & distanceCode == 1, "long",
-                                                                                                                                                  ifelse(positionCode == 0 & distanceCode == 3, "long", "short")))))) %>% 
-  mutate(shotResult = ifelse(scorepoints == 1, "Goal", "Miss"))%>%
-  mutate(shot_pos = ifelse(positionCode == 2 & distanceCode == 3, 1, 
-                           ifelse(positionCode == 2 & distanceCode == 1, 2,
-                                  ifelse(positionCode == 1 & distanceCode == 1, 3,
-                                         ifelse(positionCode == 0 & distanceCode == 1, 4, 5)))))
 
 # plot to see if home or away predictions are more effective
 plotly_build(shots%>%
@@ -22,7 +12,7 @@ plotly_build(shots%>%
                geom_bar(aes(y = (..count..)/sum(..count..)))+
                ggtitle('Goal shooting percentage for all attempts since 2009')+
                ylab("percentage of all shots")+
-               xlab('Attempt result')+
+               xlab('Attempt result')
                #facet_wrap(~year)
 )
   
@@ -34,7 +24,7 @@ ggplot(aes(x = shotResult, fill = shotResult))+
   geom_bar(aes(y = (..count..)))+
   ggtitle('Long goal shooting percentage for all attempts since 2009')+
   ylab("percentage of all long shots")+
-  xlab('Attempt result')+
+  xlab('Attempt result')
   #facet_wrap(~year)
 )
 
@@ -49,11 +39,12 @@ plotly_build(shots %>%
 
 # Percent of shots taken at distance
 plotly_build(shots %>%
-               ggplot(aes(x = shotResult, fill = shotResult))+
-               geom_bar(aes(y = (..count..)/sum(..count..)))+
-               ggtitle('Long goal shooting percentage for all attempts since 2009')+
-               ylab("percentage of all long shots")+
-               xlab('Attempt result'))
+               ggplot(aes(x = shotDistance, fill = shotDistance))+
+               geom_bar(aes( y = (..count..)/sum(..count..)))+
+               ggtitle('Long v short goal shooting percentage for all attempts since 2009')+
+               ylab("percentage of all shots")+
+               xlab('Attempt result')
+)
 
 
 
