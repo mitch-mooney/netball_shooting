@@ -13,7 +13,6 @@ plotly_build(shots%>%
                ggtitle('Goal shooting percentage for all attempts since 2009')+
                ylab("percentage of all shots")+
                xlab('Attempt result')
-               #facet_wrap(~year)
 )
   
 
@@ -21,11 +20,10 @@ plotly_build(shots%>%
 plotly_build(shots %>%
   filter(shotDistance == "long") %>% 
 ggplot(aes(x = shotResult, fill = shotResult))+
-  geom_bar(aes(y = (..count..)))+
+  geom_bar(aes(y = (..count..)/sum(..count..)))+
   ggtitle('Long goal shooting percentage for all attempts since 2009')+
   ylab("percentage of all long shots")+
   xlab('Attempt result')
-  #facet_wrap(~year)
 )
 
 # Percent of shots taken at distance vs short
