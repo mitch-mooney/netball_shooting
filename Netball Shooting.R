@@ -4,6 +4,16 @@ library(ggpmisc)
 library(dplyr)
 
 shots <- read.csv('netball_shots.csv')
+#add a few variables to assist with plotting
+shots<- shots %>%
+  mutate(shotDistance = ifelse(positionCode == 2 & distanceCode == 3, "long", ifelse(positionCode == 2 & distanceCode == 1, "long", 
+                                                                                     ifelse(positionCode == 1 & distanceCode == 1, "long", ifelse(positionCode == 0 & distanceCode == 1, "long",
+                                                                                                                                                  ifelse(positionCode == 0 & distanceCode == 3, "long", "short")))))) %>% 
+  mutate(shotResult = ifelse(scorepoints == 1, "Goal", "Miss"))%>%
+  mutate(shot_pos = ifelse(positionCode == 2 & distanceCode == 3, 1, 
+                           ifelse(positionCode == 2 & distanceCode == 1, 2,
+                                  ifelse(positionCode == 1 & distanceCode == 1, 3,
+                                         ifelse(positionCode == 0 & distanceCode == 1, 4, 5)))))
 
 # plot to see if home or away predictions are more effective
 plotly_build(shots%>%
@@ -12,38 +22,41 @@ plotly_build(shots%>%
                geom_bar(aes(y = (..count..)/sum(..count..)))+
                ggtitle('Goal shooting percentage for all attempts since 2009')+
                ylab("percentage of all shots")+
-               xlab('Attempt result'))
+               xlab('Attempt result')+
+               #facet_wrap(~year)
+)
+  
 
 # long shots percentage
 plotly_build(shots %>%
-  filter((positionCode == 2 & distanceCode == 3) | (positionCode == 2 & distanceCode == 1) | 
-           (positionCode == 1 & distanceCode == 1) | (positionCode == 0 & distanceCode == 1) |
-           (positionCode == 0 & distanceCode == 3)) %>% 
-  mutate(shotResult = ifelse(scorepoints == 1, "Goal", "Miss")) %>% 
+  filter(shotDistance == "long") %>% 
 ggplot(aes(x = shotResult, fill = shotResult))+
-  geom_bar(aes(y = (..count..)/sum(..count..)))+
+  geom_bar(aes(y = (..count..)))+
   ggtitle('Long goal shooting percentage for all attempts since 2009')+
   ylab("percentage of all long shots")+
-  xlab('Attempt result'))
+  xlab('Attempt result')+
+  #facet_wrap(~year)
+)
 
-# Percent of shots taken at distance
+# Percent of shots taken at distance vs short
 plotly_build(shots %>%
-               mutate(shotDistance = ifelse(positionCode == 2 & distanceCode == 3, "long", ifelse(positionCode == 2 & distanceCode == 1, "long", 
-                        ifelse(positionCode == 1 & distanceCode == 1, "long", ifelse(positionCode == 0 & distanceCode == 1, "long",
-                        ifelse(positionCode == 0 & distanceCode == 3, "long", "short")))))) %>% 
-               #mutate(shotResult = ifelse(scorepoints == 1, "Goal", "Miss")) %>% 
                ggplot(aes(x = shotDistance, fill = shotDistance))+
                geom_bar(aes(y = (..count..)/sum(..count..)))+
                ggtitle('Long v short goal attempts since 2009')+
                ylab("percentage of all shots")+
-               xlab('Attempt distancet'))
+               xlab('Attempt distancet')+
+               facet_grid(shotResult ~.))
 
-#create a position of the shot based on distance and position codes
-shots <- shots %>%
-  mutate(shot_pos = ifelse(positionCode == 2 & distanceCode == 3, 1, 
-                           ifelse(positionCode == 2 & distanceCode == 1, 2,
-                                  ifelse(positionCode == 1 & distanceCode == 1, 3,
-                                         ifelse(positionCode == 0 & distanceCode == 1, 4, 5)))))
+# Percent of shots taken at distance
+plotly_build(shots %>%
+               ggplot(aes(x = shotResult, fill = shotResult))+
+               geom_bar(aes(y = (..count..)/sum(..count..)))+
+               ggtitle('Long goal shooting percentage for all attempts since 2009')+
+               ylab("percentage of all long shots")+
+               xlab('Attempt result'))
+
+
+
 #summarize shots by position
 shot_summary<-shots %>%
   group_by(shot_pos, displayName) %>%
